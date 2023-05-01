@@ -21,33 +21,44 @@ td::Result<TransactionEmulationParams> decode_transaction_emulation_params(const
   TransactionEmulationParams params;
 
   std::string json_str(json);
+  LOG(INFO) << "Json input:" << json_str;
   TRY_RESULT(input_json, td::json_decode(td::MutableSlice(json_str)));
+  LOG(INFO) << "Json decoded";
   auto &obj = input_json.get_object();
 
   TRY_RESULT(utime_field, td::get_json_object_field(obj, "utime", td::JsonValue::Type::Number, false));
+  LOG(INFO) << "Utime decoded";
   TRY_RESULT(utime, td::to_integer_safe<td::uint32>(utime_field.get_number()));
   params.utime = utime;
+  LOG(INFO) << "Utime int converted";
 
   TRY_RESULT(lt_field, td::get_json_object_field(obj, "lt", td::JsonValue::Type::String, false));
+  LOG(INFO) << "Lt decoded";
   TRY_RESULT(lt, td::to_integer_safe<td::uint64>(lt_field.get_string()));
+  LOG(INFO) << "Lt to string";
   params.lt = lt;
 
   TRY_RESULT(rand_seed_str, td::get_json_object_string_field(obj, "rand_seed", true));
+  LOG(INFO) << "Rand seed decoded";
   if (rand_seed_str.size() > 0) {
     params.rand_seed_hex = rand_seed_str;
   }
 
   TRY_RESULT(ignore_chksig, td::get_json_object_bool_field(obj, "ignore_chksig", false));
   params.ignore_chksig = ignore_chksig;
+  LOG(INFO) << "chksig decoded";
 
   TRY_RESULT(debug_enabled, td::get_json_object_bool_field(obj, "debug_enabled", false));
   params.debug_enabled = debug_enabled;
+  LOG(INFO) << "debug enabled decoded";
 
   TRY_RESULT(is_tick_tock, td::get_json_object_bool_field(obj, "is_tick_tock", true, false));
   params.is_tick_tock = is_tick_tock;
+  LOG(INFO) << "is_tick_tock decoded";
 
   TRY_RESULT(is_tock, td::get_json_object_bool_field(obj, "is_tock", true, false));
   params.is_tock = is_tock;
+  LOG(INFO) << "tock decoded";
 
   if (is_tock && !is_tick_tock) {
     return td::Status::Error("Inconsistent parameters is_tick_tock=false, is_tock=true");
